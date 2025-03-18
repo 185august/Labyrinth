@@ -1,9 +1,10 @@
 function updateView() {
     let html = `
     <table>
-       ${mazeModel.rows.map((row) => `
+       ${mazeModel.rows.map((row, rowIndex) => `
         <tr> 
-            ${row.map((column) => `<td class="${whatCssClass(column.isHigh, column.isWide, column.isOpen)}"></td>`).join('')}
+            ${row.map((column, columnIndex) => `
+            <td onclick="removeWall(${rowIndex}, ${columnIndex})" class="${whatCssClass(column)}"></td>`).join('')}
         </tr>`).join('')}
     </table>
     `
@@ -17,41 +18,43 @@ function initModel(size) {
     for (let i = 0; i <= mazeModel.size; i++) {
         const row = []
         let isHigh = i % 2 === 0 ? false : true;
+        if (i === mazeModel.size) {
+            isHigh = false;
+        }
+        let isWide;
+        row.push({ isHigh, isWide: false })
         for (let j = 0; j <= mazeModel.size; j++) {
-            let isWide = j % 2 === 0 ? false : true;
-            if (j === mazeModel.size) {
-                isWide = false;
-                isHigh = false;
-                row.push({ isHigh, isWide });
-                break;
+            isWide = j % 2 === 0 ? true : false;
+            if (j == mazeModel.size || i == 0 || i == mazeModel.size) {
+                row.push({ isHigh: false, isWide: false })
+            } else {
+                const isOpen = Math.random() > .5
+                row.push({ isHigh, isWide, isOpen })
             }
-            const isOpen = !(isHigh || isWide)
-            row.push({ isHigh, isWide, isOpen })
         }
         mazeModel.rows.push(row);
     }
+    return mazeModel.rows;
+}
+function removeWall(rowIndex, columnIndex) {
+    console.log(rowIndex, columnIndex)
+    const cell = mazeModel.rows[rowIndex][columnIndex]
+    console.log(cell)
+    if (cell.isOpen === undefined) return;
+    cell.isOpen = !cell.isOpen;
+    updateView();
 }
 
-function isAWall(index) {
-    const rows = mazeModel.rows[index]
+function isAWall(rowIndex, columnIndex) {
+
     for (let row in rows) {
         row.isHigh = false;
     }
 }
-function whatCssClass(isHigh, isWide, isOpen) {
-    if (isOpen) {
-        return "nowall wide low"
-    }
-    if (!isHigh) {
-        if (!isWide) {
-            return "wall small low"
-        } else {
-            return "wall wide low"
-        }
-    }
-    else if (!isWide) {
-        return "wall small high"
-    } else {
-        return "nowall wide high"
-    }
+function whatCssClass(square) {
+    if (square.isHigh && square.isWide) return 'room';
+    const highLow = square.isHigh ? 'high ' : 'low ';
+    const wideSmall = square.isWide ? 'wide ' : 'small ';
+    const wall = square.isOpen ? 'noWall ' : 'wall ';
+    return highLow + wideSmall + wall;
 }
