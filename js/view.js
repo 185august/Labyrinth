@@ -1,48 +1,41 @@
 function updateView() {
     let html = `
     <table>
-        ${mazeModel.rows.join('')}
+       ${mazeModel.rows.map((row) => `
+        <tr> 
+            ${row.map((column) => `<td class="${whatCssClass(column.isHigh, column.isWide, column.isOpen)}"></td>`).join('')}
+        </tr>`).join('')}
     </table>
     `
     document.getElementById('app').innerHTML = html;
 }
 
-
 function initModel(size) {
+    mazeModel.size = parseInt(size)
     mazeModel.rows = []
-    let isHigh = true;
-    for (let rowIndex = 0; rowIndex <= size; rowIndex++) {
-        mazeModel.rows.push(createRow(size, !isHigh))
-        mazeModel.rows.push(createRow(size, isHigh))
-    }
-    mazeModel.rows.push(createRow(size, !isHigh))
-    let html = mazeModel.rows
-    return html
-}
 
-function createRow(size, isHigh) {
-
-    let rowHtml = `<tr>`
-    for (let i = 0; i <= size; i++) {
-        let isWide = i % 2 === 0 ? true : false;
-        if (i == 0 || i == size) {
-            rowHtml += createColumn(!isHigh, isWide = false);
+    for (let i = 0; i <= mazeModel.size; i++) {
+        const row = []
+        let isHigh = i % 2 === 0 ? false : true;
+        for (let j = 0; j <= mazeModel.size; j++) {
+            let isWide = j % 2 === 0 ? false : true;
+            if (j === mazeModel.size) {
+                isWide = false;
+                isHigh = false;
+                row.push({ isHigh, isWide });
+                break;
+            }
+            const isOpen = !(isHigh || isWide)
+            row.push({ isHigh, isWide, isOpen })
         }
-        rowHtml += createColumn(isHigh, isWide)
+        mazeModel.rows.push(row);
     }
-    rowHtml += `</tr>`
-    return rowHtml
-}
-
-function createColumn(isHigh, isWide) {
-
-    /* return `<td class="${whatCssClass(isHigh, isWide)}"></td>` */
 }
 
 function isAWall(index) {
     const rows = mazeModel.rows[index]
-    for (let row of rows) {
-        row.isOpen = false;
+    for (let row in rows) {
+        row.isHigh = false;
     }
 }
 function whatCssClass(isHigh, isWide, isOpen) {

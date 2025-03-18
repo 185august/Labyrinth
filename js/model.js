@@ -1,10 +1,5 @@
 const mazeModel = {
     size: 3,
-    cssClasses: [
-        'noWall high wide',
-        'wall low small',
-        ''
-    ],
     rows: [
         [
             { isHigh: false, isWide: false, isOpen: false },
